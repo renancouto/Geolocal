@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html class="html">
+<head>
+<meta charset="utf-8">
+<title>Geolocal</title>
+
+<style type="text/css">
+
+* { margin: 0; padding: 0; }
+
+body { font: 16px/1em Arial, sans-serif; }
+table { width: 100%; }
+
+th {
+	background: #066;
+	color: #fff;
+	padding: 10px;
+}
+
+td {
+	background: #ececec;
+	font-size: 20px;
+	padding: 20px 10px;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+</style>
+
+<script src="modernizr-2.6.2.min.js"></script>
+
+</head>
+
+<body>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script>!window.jQuery && document.write(unescape('%3Cscript src="jquery-1.8.2.min.js"%3E%3C/script%3E'))</script>
+
+<script src="jquery.geolocal.js"></script>
+
+<script>
+$(function(){
+	$.geolocal({
+		success: function(data) {
+			console.log(data);
+		}
+	});
+});
+</script>
+
+</body>
+</html>

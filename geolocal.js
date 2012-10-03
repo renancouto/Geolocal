@@ -1,9 +1,28 @@
-/* Geolocal
+/*	Geolocal(https://github.com/renancouto/Geolocal) - get user's location
+
+	@info:		Get user's location and set an object (Geolocal) with that data, also stores that data to browser's locaStorage when available to get it faster on other page loads
+
+	@author:	Renan Couto
+	@version:	0.1
+	@created:	Oct Mon 01 2011
+	@updated:	Oct Wed 03 2012
+	@license:	MIT & BSD
+	@url:		https://github.com/renancouto/Geolocal
+
+	@changelog:
+	version: 0.1
+	- Added to Github
+
+	@todo:
+	- add more services
+	- add compability to non JSON browsers
 */
 
 ;window.Geolocal = (function(window, document, undefined) {
 
 	var Geolocal = {},
+
+		id = 'geolocal',
 
 		// Added services
 		services = {
@@ -27,7 +46,7 @@
 				dependent: 'yahoo'		// but this will convert the coordinates to known places
 			},
 
-			useBrowserAPI: false,		// Will use browser's geolocation to get the user's latitude / longitude
+			useBrowserAPI: true,		// Will use browser's geolocation to get the user's latitude / longitude
 			keepData: true				// Will keep the data on user's browser using localStorage and will try to get that data whenever it's available
 		},
 
@@ -62,25 +81,21 @@
 			navigator.geolocation.getCurrentPosition(function(position) {
 				Geolocal.latitude = position.coords.latitude;
 				Geolocal.longitude = position.coords.longitude;
-				Data.Load(true);
+				Data.Load();
 			}, Coords.Error);
 		},
 
 		Error: function(error) {
-			console.log(error);
+			console.error('Geolocal ERROR: ', error);
 		}
 	},
 
 	Data = {
-		Load: function(reverse) {
+		Load: function() {
 			var request = new XMLHttpRequest(),
-				url = services[service].url;
-
-			if (config.useBrowserAPI) {
-				url = url.replace('{{latitude}}', Geolocal.latitude).replace('{{longitude}}', Geolocal.longitude);
-			}
-
-			console.log(url);
+				url = services[service].url
+					.replace('{{latitude}}', Geolocal.latitude)
+					.replace('{{longitude}}', Geolocal.longitude);
 
 			request.open(config.conectionType, url, true);
 			request.send(null);
@@ -92,7 +107,7 @@
 						Data.Set();
 					}
 					else {
-						console.error('Geolocal ERROR: could not get any data', request);
+						console.error('Geolocal ERROR: could not get any data ', request);
 					}
 				}
 			};
@@ -124,13 +139,26 @@
 	Services = {
 		yahoo: function(data) {
 			Geolocal = Data.Convert.FromString(data);
-			Geolocal = Geolocal.ResultSet.Result;
+			Geolocal = Geolocal.ResultSet.Results[0];
 		},
 
 		maxmind: function(data) {
-			// eval("function geoip_country_code() { return 'BR'; }");
-			console.log(data);
-			// setTimeout(function(){ eval(data); console.log('ok'); }, 10);
+			// Transform return to JSON string
+			data = data
+				.replace(/function geoip_/g, '"')
+				.replace(/\(\)/g, '"')
+				.replace(/\{ return/g, ':')
+				.replace(/; \}/g, ',')
+				.replace(/'/g, '"');
+
+			data = '{' + data.slice(0, data.length - 2) + '}';
+
+			Geolocal = Data.Convert.FromString(data);
+			// Set country and state shortcuts
+			Geolocal.country = Geolocal.country_name;
+			Geolocal.state = Geolocal.region_name;
+
+			Data.Set();
 		}
 	};
 
